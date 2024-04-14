@@ -3,7 +3,7 @@ const SPRITE_NAME = 'pentagram';
 export class Pentagram extends Phaser.GameObjects.Sprite {
 
     private fx;
-    private tween: Phaser.Tweens.Tween;
+    private tween: Phaser.Tweens.Tween | undefined;
 
     constructor(scene: Phaser.Scene, x: number, y: number) {
         super(scene, x, y, SPRITE_NAME);
@@ -24,8 +24,8 @@ export class Pentagram extends Phaser.GameObjects.Sprite {
 
     changeColor(color: number) {
         this.setTint(color);
-        this.tween.stop();
+        this.tween?.stop();
         this.fx.color = color;
-        this.tween.restart();
+        this.tween?.restart();
     }
 }

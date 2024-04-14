@@ -34,7 +34,7 @@ export default class GameOverScene extends Phaser.Scene {
             yoyo: true,
             repeat: -1
         });
-        this.add.text(this.game.renderer.width / 2, this.game.renderer.height / 2 + 330, 'A Osheanoush & LeoZero game 🧠🫀', { color: '#fff', fontStyle: "italic" }).setOrigin(0.5);
+        this.add.text(this.game.renderer.width / 2, this.game.renderer.height / 2 + 330, '🧠 a Osheanoush & LeoZero game 🫀', { color: '#fff', fontStyle: "italic" }).setOrigin(0.5);
         this.input.on('pointerdown', () => {
             this.scene.start(GAME_SCENE_NAME);
         });

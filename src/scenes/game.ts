@@ -141,10 +141,30 @@ export default class Game extends Phaser.Scene {
     }
 
     spawnMonster() {
-        const x = 1000 * Math.cos(Math.PI * 2 * Phaser.Math.Between(0, 360) / 360);
-        const y = 1000 * Math.sin(Math.PI * 2 * Phaser.Math.Between(0, 360) / 360);
+        let x = 0;
+        let y = 0;
+        const random = Phaser.Math.Between(1, 4);
+        switch (random) {
+            case 1:
+                x = Phaser.Math.Between(0, this.width);
+                y = -100;
+                break;
+            case 2:
+                x = -100;
+                y = Phaser.Math.Between(0, this.height);
+                break;
+            case 3:
+                x = Phaser.Math.Between(0, this.width);
+                y = this.height + 100;
+                break;
+            case 4:
+                x = this.width + 100;
+                y = Phaser.Math.Between(0, this.height);
+                break;
 
-        const monster = new Monster(this, this.centerX + x, this.centerY + y);
+        }
+
+        const monster = new Monster(this, x, y);
 
         this.physics.moveToObject(monster, this.pentagram, this.ennemySpeed++);
         this.monsters.add(monster);

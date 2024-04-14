@@ -10,8 +10,8 @@ const config: Phaser.Types.Core.GameConfig = {
     type: Phaser.AUTO,
     pixelArt: true,
     parent: "app",
-    width: 1024,
-    height: 768,
+    width: window.innerWidth - 3,
+    height: window.innerHeight - 3,
     scene: [IntroScene, GameScene, GameOverScene],
     physics: {
         default: "arcade",

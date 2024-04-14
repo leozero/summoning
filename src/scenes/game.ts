@@ -194,6 +194,8 @@ export default class Game extends Phaser.Scene {
         this.setDimensions();
         this.life = 5;
         this.score = 0;
+        this.ennemySpawn = 1000;
+        this.ennemySpeed = 20;
 
         /* Floor */
         this.add

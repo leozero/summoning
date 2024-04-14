@@ -5,9 +5,9 @@ export default class GUI extends Phaser.GameObjects.Container {
 
     private combinations: Combination[] = [];
     private hearts: Phaser.GameObjects.Sprite[] = [];
-    private scoreText: Phaser.GameObjects.Text;
+    private scoreText: Phaser.GameObjects.Text | undefined;
     private combinationsTexts: Phaser.GameObjects.Text[] = [];
-    private combinationsSprites: Phaser.GameObjects.Text[] = [];
+    private combinationsSprites: Phaser.GameObjects.Sprite[] = [];
 
     constructor(scene: Game, x: number, y: number, combinations: Combination[]) {
         super(scene, x, y);
@@ -20,8 +20,10 @@ export default class GUI extends Phaser.GameObjects.Container {
     }
 
     displayScore() {
+        // @ts-ignore
         if (this.scoreText) this.scoreText.setText(`${this.scene.score}`);
         else this.scoreText =
+            // @ts-ignore
             this.scene.add.text(this.scene.centerX, 20, `${this.scene.score}`, {
                 fontSize: "50px",
                 stroke: "#000000",
@@ -32,9 +34,12 @@ export default class GUI extends Phaser.GameObjects.Container {
 
     displayHeart() {
         this.hearts.forEach(heart => heart.destroy());
+        // @ts-ignore
         for (let i = this.scene.life; i--; i < 0) {
+            // @ts-ignore
             const heart = this.scene.add.sprite(this.scene.width - (50 + (50 * i)), 40, "heart").setScale(1.5);
             this.hearts.push(heart);
+            // @ts-ignore
             heart.preFX.addGlow(0xff0000, 1, 1, false, 0.1, 50);
         };
     }

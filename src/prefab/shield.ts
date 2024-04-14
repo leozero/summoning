@@ -14,8 +14,9 @@ export class Shield extends Phaser.GameObjects.Container {
         this.postFX.addGlow(color, 0, 0, false, 0.1, 50);
     }
 
-    update(delta: number) {
+    update() {
         this.circle.setRadius(this.circle.radius + 2);
+        // @ts-ignore
         this.circle.body?.setCircle(this.circle.radius + 1);
         if (this.circle.radius > 200) {
             this.circle.alpha -= 0.01;

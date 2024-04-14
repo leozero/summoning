@@ -5,7 +5,7 @@ export const SCENE_NAME = "gameover";
 
 export default class GameOverScene extends Phaser.Scene {
 
-    private score: number;
+    private score: number = 0;
 
     constructor() {
         super(SCENE_NAME);
@@ -15,7 +15,7 @@ export default class GameOverScene extends Phaser.Scene {
         this.load.image("pentagram", "sprites/pentagram.png");
     }
 
-    init(data) {
+    init(data: { score: number }) {
         this.score = data.score;
     }
 

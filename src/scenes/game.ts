@@ -6,7 +6,6 @@ import { Shield } from "../prefab/shield";
 import Pinguin from "../prefab/pinguin";
 import { Monster } from "../prefab/monster";
 
-
 export const SCENE_NAME = "game";
 
 export enum Color {
@@ -16,20 +15,19 @@ export enum Color {
 }
 
 export default class Game extends Phaser.Scene {
-
-    private pentagram: Pentagram;
-    private pinguin: Pinguin;
-    private gui: GUI;
-    private shields: Phaser.GameObjects.Group;
-    private monsters: Phaser.GameObjects.Group;
-    private shieldColliders: Phaser.GameObjects.Group;
-    private centerX: number;
-    private centerY: number;
+    private pentagram: Pentagram | undefined;
+    private pinguin: Pinguin | undefined;
+    private gui: GUI | undefined;
+    private shields: Phaser.GameObjects.Group | undefined;
+    private monsters: Phaser.GameObjects.Group | undefined;
+    private shieldColliders: Phaser.GameObjects.Group | undefined;
+    private centerX: number = 0;
+    private centerY: number = 0;
     private combinations: Combination[] = [];
-    private width: number;
-    private height: number;
-    private monsterInterval: number;
-    private spotlight: Phaser.GameObjects.Light;
+    private width: number = 0;
+    private height: number = 0;
+    private monsterInterval: number = 0;
+    private spotlight: Phaser.GameObjects.Light | undefined;
     public life = 5;
     public score = 0;
     private ennemySpeed = 20;
@@ -42,28 +40,37 @@ export default class Game extends Phaser.Scene {
 
     registerCombinations() {
         // RED
-        this.combinations.push(new Combination(
-            "Red shadow",
-            [Direction.UP, Direction.DOWN, Direction.LEFT, Direction.RIGHT],
-            Color.RED
-        ));
+        this.combinations.push(
+            new Combination(
+                "Red shadow",
+                [Direction.UP, Direction.DOWN, Direction.LEFT, Direction.RIGHT],
+                Color.RED
+            )
+        );
         // BLUE
-        this.combinations.push(new Combination(
-            "Blue wind",
-            [Direction.LEFT, Direction.LEFT, Direction.DOWN, Direction.UP],
-            Color.BLUE
-        ));
+        this.combinations.push(
+            new Combination(
+                "Blue wind",
+                [Direction.LEFT, Direction.LEFT, Direction.DOWN, Direction.UP],
+                Color.BLUE
+            )
+        );
         // GREEN
-        this.combinations.push(new Combination(
-            "Green fire",
-            [Direction.DOWN, Direction.RIGHT, Direction.DOWN, Direction.RIGHT],
-            Color.GREEN
-        ));
+        this.combinations.push(
+            new Combination(
+                "Green fire",
+                [Direction.DOWN, Direction.RIGHT, Direction.DOWN, Direction.RIGHT],
+                Color.GREEN
+            )
+        );
     }
 
     preload() {
         this.load.image("pentagram", "sprites/pentagram.png");
-        this.load.spritesheet("pinguin", "sprites/pinguin.png", { frameWidth: 59, frameHeight: 98 });
+        this.load.spritesheet("pinguin", "sprites/pinguin.png", {
+            frameWidth: 59,
+            frameHeight: 98,
+        });
         this.load.image("skeleton", "sprites/skeleton.png");
         this.load.image("zombie", "sprites/zombie.png");
         this.load.image("ghost", "sprites/ghost.png");
@@ -89,25 +96,28 @@ export default class Game extends Phaser.Scene {
 
     spawnShield(color: number) {
         const shield = new Shield(this, this.centerX, this.centerY, color);
-        this.shields.add(shield);
-        this.shieldColliders.add(shield.circle);
-        this.physics.add.overlap(this.monsters, shield.circle);
-        shield.circle.on('overlap', (gameObject1, gameObject2) => {
-            if (gameObject1.getData('color') === gameObject2.getData('color')) {
-                gameObject1.destroy();
-            }
-        });
-        this.pentagram.changeColor(color);
-        this.spotlight.setColor(color);
+        this.shields?.add(shield);
+        this.shieldColliders?.add(shield.circle);
+        if (this.monsters) {
+            this.physics.add.overlap(this.monsters, shield.circle);
+        }
+
+        // shield.circle.on("overlap", (gameObject1, gameObject2) => {
+        //     if (gameObject1.getData("color") === gameObject2.getData("color")) {
+        //         gameObject1.destroy();
+        //     }
+        // });
+        this.pentagram?.changeColor(color);
+        this.spotlight?.setColor(color);
         setTimeout(() => {
-            this.pentagram.changeColor(0xffffff);
-            this.spotlight.setColor(0xffffff);
+            this.pentagram?.changeColor(0xffffff);
+            this.spotlight?.setColor(0xffffff);
         }, 700);
-        this.pinguin.play('summon');
+        this.pinguin?.play("summon");
         this.sound.play("shield");
     }
 
-    listenKeyboard(event) {
+    listenKeyboard(event: KeyboardEvent) {
         switch (event.key) {
             case "ArrowLeft":
                 this.checkKey(Direction.LEFT);
@@ -127,17 +137,16 @@ export default class Game extends Phaser.Scene {
     }
 
     checkKey(Direction: Direction) {
-        this.combinations.forEach(combination => {
+        this.combinations.forEach((combination) => {
             combination.addKey(Direction);
             if (combination.valid) {
                 this.spawnShield(combination.color);
-                this.combinations.forEach(combination => combination.reset());
-                this.gui.update();
+                this.combinations.forEach((combination) => combination.reset());
+                this.gui?.update();
                 return;
             }
-            this.gui.update();
+            this.gui?.update();
         });
-
     }
 
     spawnMonster() {
@@ -161,14 +170,17 @@ export default class Game extends Phaser.Scene {
                 x = this.width + 100;
                 y = Phaser.Math.Between(0, this.height);
                 break;
-
         }
 
         const monster = new Monster(this, x, y);
+        if (this.pentagram) {
+            this.physics.moveToObject(monster, this.pentagram, this.ennemySpeed++);
+        }
 
-        this.physics.moveToObject(monster, this.pentagram, this.ennemySpeed++);
-        this.monsters.add(monster);
-        this.physics.add.overlap(this.monsters, this.pinguin);
+        if (this.monsters && this.pinguin) {
+            this.monsters.add(monster);
+            this.physics.add.overlap(this.monsters, this.pinguin);
+        }
     }
 
     getRandomDecoration() {
@@ -184,31 +196,49 @@ export default class Game extends Phaser.Scene {
         this.score = 0;
 
         /* Floor */
-        this.add.tileSprite(0, 0, this.width, this.height, "ground").setOrigin(0, 0).setAlpha(0.5).setPipeline('Light2D');
+        this.add
+            .tileSprite(0, 0, this.width, this.height, "ground")
+            .setOrigin(0, 0)
+            .setAlpha(0.5)
+            .setPipeline("Light2D");
         for (let i = 0; i < 5; i++) {
             const x = Phaser.Math.Between(0, 400);
             const y = Phaser.Math.Between(150, this.height);
-            this.add.sprite(x, y, this.getRandomDecoration()).setScale(1.2).setPipeline('Light2D');
+            this.add
+                .sprite(x, y, this.getRandomDecoration())
+                .setScale(1.2)
+                .setPipeline("Light2D");
         }
         for (let i = 0; i < 5; i++) {
             const x = Phaser.Math.Between(600, this.width);
             const y = Phaser.Math.Between(150, this.height);
-            this.add.sprite(x, y, this.getRandomDecoration()).setScale(1.2).setPipeline('Light2D');
+            this.add
+                .sprite(x, y, this.getRandomDecoration())
+                .setScale(1.2)
+                .setPipeline("Light2D");
         }
         for (let i = 0; i < 2; i++) {
             const x = Phaser.Math.Between(400, 600);
             const y = Phaser.Math.Between(0, 300);
-            this.add.sprite(x, y, this.getRandomDecoration()).setScale(1.2).setPipeline('Light2D');
+            this.add
+                .sprite(x, y, this.getRandomDecoration())
+                .setScale(1.2)
+                .setPipeline("Light2D");
         }
         for (let i = 0; i < 2; i++) {
             const x = Phaser.Math.Between(400, 600);
             const y = Phaser.Math.Between(600, this.height);
-            this.add.sprite(x, y, this.getRandomDecoration()).setScale(1.2).setPipeline('Light2D');
+            this.add
+                .sprite(x, y, this.getRandomDecoration())
+                .setScale(1.2)
+                .setPipeline("Light2D");
         }
 
         this.lights.enable();
         this.lights.setAmbientColor(0x808080);
-        this.spotlight = this.lights.addLight(this.centerX, this.centerY, 280).setIntensity(3);
+        this.spotlight = this.lights
+            .addLight(this.centerX, this.centerY, 280)
+            .setIntensity(3);
 
         /* GUI */
         this.gui = new GUI(this, 10, 10, this.combinations);
@@ -226,9 +256,9 @@ export default class Game extends Phaser.Scene {
         this.physics.add.existing(this.pinguin);
 
         this.anims.create({
-            key: 'summon',
-            frames: this.anims.generateFrameNumbers('pinguin'),
-            frameRate: 16
+            key: "summon",
+            frames: this.anims.generateFrameNumbers("pinguin"),
+            frameRate: 16,
         });
 
         /* Monster */
@@ -238,39 +268,46 @@ export default class Game extends Phaser.Scene {
             callback: this.spawnMonster,
             callbackScope: this,
             delay: this.ennemySpawn--,
-            loop: true
+            loop: true,
         });
 
         /* Collision */
-        this.physics.world.on('overlap', (monster, gameObject) => {
-            const type = gameObject.getData("type");
-            if (type === 'player') {
-                this.life--;
-                this.sound.play("hurt", { volume: 2 });
-                this.gui.update();
-                if (this.life <= 0) {
-                    this.clean();
-                    this.sound.play("death");
-                    this.scene.start("gameover", { score: this.score });
-                }
-                monster.destroy();
-            }
-            if (type === 'shield') {
-                if (monster.getData('color') === gameObject.getData('color')) {
-                    this.sound.play("hit");
+        this.physics.world.on(
+            "overlap",
+            (
+                monster: Phaser.GameObjects.Sprite,
+                gameObject: Phaser.GameObjects.Sprite
+            ) => {
+                const type = gameObject.getData("type");
+                if (type === "player") {
+                    this.life--;
+                    this.sound.play("hurt", { volume: 2 });
+                    this.gui?.update();
+                    if (this.life <= 0) {
+                        this.clean();
+                        this.sound.play("death");
+                        this.scene.start("gameover", { score: this.score });
+                    }
                     monster.destroy();
-                    this.score++;
-                    this.gui.update();
+                }
+                if (type === "shield") {
+                    if (monster.getData("color") === gameObject.getData("color")) {
+                        this.sound.play("hit");
+                        monster.destroy();
+                        this.score++;
+                        this.gui?.update();
+                    }
                 }
             }
-        });
+        );
 
         /* Keyboard */
+        // @ts-ignore
         this.input.keyboard?.on("keydown", () => this.listenKeyboard(event));
     }
 
     clean() {
         clearInterval(this.monsterInterval);
-        this.combinations.forEach(combination => combination.reset());
+        this.combinations.forEach((combination) => combination.reset());
     }
 }

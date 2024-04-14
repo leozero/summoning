@@ -1,7 +1,5 @@
 import { Color } from "../scenes/game";
 
-const SPRITE_NAME = 'zombie';
-
 export class Monster extends Phaser.GameObjects.Sprite {
 
     constructor(scene: Phaser.Scene, x: number, y: number) {
@@ -12,9 +10,10 @@ export class Monster extends Phaser.GameObjects.Sprite {
         this.scene.add.existing(this);
         this.setData("color", color);
         this.setData("type", "monster")
-        const fx = this.postFX.addGlow(color, 1, 2, false, 0.1, 10);
+        this.postFX.addGlow(color, 1, 2, false, 0.1, 10);
         this.scene.physics.add.existing(this);
         this.z = -5;
+        // @ts-ignore
         this.body.onOverlap = true;
 
     }
@@ -32,6 +31,7 @@ export class Monster extends Phaser.GameObjects.Sprite {
     }
 
     preUpdate() {
+        // @ts-ignore
         if (this.x > this.scene.centerX) {
             this.setFlipX(true);
         } else {
